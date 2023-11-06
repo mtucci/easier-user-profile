@@ -83,7 +83,7 @@ public class Profiler {
      * @param idleScalingFactor Scaling factor for the consumption when idle
      * @return The energy consumption for the entire system
      */
-    public static Double computeSystemEnergy(
+    public static double computeSystemEnergy(
             final UML uml,
             final LQN lqn,
             final double idleScalingFactor) {
@@ -96,5 +96,28 @@ public class Profiler {
                 .mapToDouble(e -> computePower(e.getValue(),
                         energyCoefficients.get(e.getKey()), idleScalingFactor))
                 .sum();
+    }
+
+    /**
+     * Compute the price profile by using the price tags defined for UML Nodes
+     *
+     * @param uml The UML model
+     * @param lqn The LQN model
+     * @return Map with the scenario name as key and the price profile value as value.
+     */
+    public static Map<String, Double> computePriceProfile(final UML uml, final LQN lqn) {
+        return computeProfile(lqn.getEntriesByScenario(), uml.getNodesPrices());
+    }
+
+    /**
+     * Compute the price for the entire system by summing up the price tags defined for UML Nodes
+     *
+     * @param uml The UML model
+     * @return The price for the entire system
+     */
+    public static double computeSystemPrice(final UML uml) {
+        return uml.getNodesPrices().values().stream()
+				.mapToDouble(Double::doubleValue)
+				.sum();
     }
 }

@@ -45,11 +45,12 @@ public class UML {
                 .getElementsByTagName(xmlDoc.getDocumentElement(), "GRM:ResourceUsage");
 
         // Build a Map<base_NamedElement, energy>
-        return resourceUsages.stream().collect(Collectors.toMap(
-                r -> r.getAttribute("base_NamedElement"),
-                r -> Double.parseDouble(
-                        r.getElementsByTagName("energy").item(0)
-                        .getFirstChild().getNodeValue())
+        return resourceUsages.stream()
+                .collect(Collectors.toMap(
+                        r -> r.getAttribute("base_NamedElement"),
+                        r -> Double.parseDouble(
+                                r.getElementsByTagName("energy").item(0)
+                                .getFirstChild().getNodeValue())
                 ));
     }
 
@@ -70,6 +71,43 @@ public class UML {
                 node -> node.getValue(),
                 node -> energy.get(node.getKey())
         ));
+    }
+
+    /**
+     * Read the 'price' tag of the HwLayout:HwComponent stereotype from the UML file.
+     *
+     * @return Map with the element ID as key and the price as value.
+     */
+    public Map<String, Double> getPricesFromHwComponent() {
+        // Get the stereotypes applications
+        final List<Element> hwcomponents = XMLHelper
+                .getElementsByTagName(xmlDoc.getDocumentElement(), "HwLayout:HwComponent");
+
+        // Build a Map<base_NamedElement, energy>
+        return hwcomponents.stream()
+                .collect(Collectors.toMap(
+                        h -> h.getAttribute("base_Classifier"),
+                        h -> Double.parseDouble(h.getAttribute("price"))
+                ));
+    }
+
+    /**
+     * Get the price for each node.
+     *
+     * @return Map<node name, price>
+     */
+    public Map<String, Double> getNodesPrices() {
+        // Get the price tag from HwLayout:HwComponent
+        final Map<String, Double> prices = getPricesFromHwComponent();
+
+        // Get the Nodes
+        final Map<String, String> nodes = getNodes();
+
+        // Match the base_Classifier with the UML Node ID
+        return nodes.entrySet().stream().collect(Collectors.toMap(
+				node -> node.getValue(),
+				node -> prices.get(node.getKey())
+		));
     }
 
     public String getUmlFile() {

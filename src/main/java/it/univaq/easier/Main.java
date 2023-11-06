@@ -49,5 +49,12 @@ public class Main {
         System.out.println("\n### System energy:");
         System.out.println(Profiler.computeSystemEnergy(uml, lqn, idleScalingFactor));
 
+        // Compute the price profile
+        System.out.println("\n### Price profile:");
+        Profiler.computePriceProfile(uml, lqn).forEach((k, v) -> System.out.println(k + " -> " + v));
+
+        // Compute the system price
+        System.out.println("\n### System price:");
+        System.out.println(Profiler.computeSystemPrice(uml));
     }
 }
