@@ -75,6 +75,6 @@ public class Entry {
 
     @Override
     public String toString() {
-        return String.format("Entry %s on processor %s with utilization %f", name, processor, utilization);
+        return String.format("Entry [%s]\n\t  on processor [%s]\n\t  with utilization [%f]", name, processor, utilization);
     }
 }
