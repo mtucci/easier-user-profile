@@ -70,6 +70,7 @@ public class Main {
         // Compute the energy profile
         System.err.println("\n### Energy profile:");
         final Map<String, Double> energyProfile = Profiler.computeEnergyProfile(uml, lqn, idleScalingFactor);
+        energyProfile.forEach((k, v) -> out.put("power__" + k, v));
         energyProfile.forEach((k, v) -> System.err.println(k + " -> " + v));
         System.err.println("\n### Sum of the energy profiles:");
         System.err.println(energyProfile.values().stream().mapToDouble(Double::doubleValue).sum());
@@ -82,6 +83,7 @@ public class Main {
         // Compute the price profile
         System.err.println("\n### Price profile:");
         final Map<String, Double> priceProfile = Profiler.computePriceProfile(uml, lqn);
+        priceProfile.forEach((k, v) -> out.put("price__" + k, v));
         priceProfile.forEach((k, v) -> System.err.println(k + " -> " + v));
         System.err.println("\n### Sum of the price profiles:");
         System.err.println(priceProfile.values().stream().mapToDouble(Double::doubleValue).sum());
