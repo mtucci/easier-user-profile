@@ -8,7 +8,7 @@ public class Main {
 
     // Scaling factor for the consumption when idle [0,1]
     // https://dl.acm.org/doi/10.5555/1387589.1387613
-    private static final double idleScalingFactor = 0.66;
+    private static final double idleScalingFactor = 0.3;
 
     private static void checkParams(final String[] args) {
         if (args.length != 2) {
