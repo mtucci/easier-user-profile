@@ -73,8 +73,8 @@ public class LQN {
         final List<Element> synchCalls = XMLHelper.getElementsByTagName(entry, "synch-call");
 
         return synchCalls.stream().map(call -> new Call(
-                entry.getAttribute("name"),    // caller
-                call.getAttribute("dest")    // called
+                entry.getAttribute("name"),		// caller
+                call.getAttribute("dest")		// called
         )).collect(Collectors.toList());
     }
 

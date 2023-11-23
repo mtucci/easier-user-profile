@@ -9,6 +9,7 @@ public class Entry {
     private String task;
     private String processor;
     private Double utilization;
+    private Double procUtilization;
 
     public Entry(final Element entry) {
         super();
@@ -16,7 +17,8 @@ public class Entry {
         this.name = getEntryName(entry);
         this.task = getTaskName(entry);
         this.processor = getProcessorName(entry);
-        this.utilization = getUtilization(entry);
+        this.utilization = readUtilization(entry);
+        this.procUtilization = readProcUtilization();
     }
 
     private String getEntryName(final Element entry) {
@@ -31,10 +33,17 @@ public class Entry {
         return ((Element) entry.getParentNode().getParentNode()).getAttribute("name");
     }
 
-    private Double getUtilization(final Element entry) {
+    private Double readUtilization(final Element entry) {
         return Double.parseDouble(
-                ((Element) entry.getElementsByTagName("result-entry").item(0))
+                XMLHelper.getElementsByTagName(entry, "result-entry").get(0)
                 .getAttribute("proc-utilization"));
+    }
+
+    private Double readProcUtilization() {
+        final Element proc = (Element) entry.getParentNode().getParentNode();
+        return Double.parseDouble(
+                XMLHelper.getElementsByTagName(proc, "result-processor").get(0)
+                .getAttribute("utilization"));
     }
 
     public Element getEntry() {
@@ -71,6 +80,10 @@ public class Entry {
 
     public void setUtilization(final Double utilization) {
         this.utilization = utilization;
+    }
+
+    public Double getProcUtilization() {
+        return this.procUtilization;
     }
 
     @Override

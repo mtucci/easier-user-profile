@@ -21,7 +21,10 @@ public class Profiler {
             final double maxConsumption,
             final double idleScalingFactor) {
         // k * p_max + (1 - k) * p_max * u
-        return idleScalingFactor * maxConsumption + (1 - idleScalingFactor) * maxConsumption * utilization;
+        //return idleScalingFactor * maxConsumption + (1 - idleScalingFactor) * maxConsumption * utilization;
+
+        // (1 - u) * k * p_max + u * p_max
+        return (1 - utilization) * idleScalingFactor * maxConsumption + utilization * maxConsumption;
     }
 
     /**
@@ -41,11 +44,11 @@ public class Profiler {
 
         return scenarios.values().stream()
                 .collect(Collectors.toMap(
-                    sc -> sc.getName(),
-                    sc -> sc.getEntries().stream()
+                        sc -> sc.getName(),
+                        sc -> sc.getEntries().stream()
                         .mapToDouble(e -> e.getUtilization() * coefficients.get(e.getProcessor()))
                         .sum()
-        ));
+                        ));
     }
 
     /**
@@ -64,14 +67,23 @@ public class Profiler {
         final Map<String, Scenario> scenarios = lqn.getEntriesByScenario();
         final Map<String, Double> energyCoefficients = uml.getNodesEnergy();
 
-        return scenarios.values().stream()
-                .collect(Collectors.toMap(
-                    sc -> sc.getName(),
-                    sc -> sc.getEntries().stream()
-                        .mapToDouble(e -> computePower(e.getUtilization(),
-                                energyCoefficients.get(e.getProcessor()), idleScalingFactor))
-                        .sum()
-        ));
+        final Map<String, Double> profiles = scenarios.keySet().stream()
+                .collect(Collectors.toMap(sc -> sc,	sc -> 0.0));
+
+        // Each entry contributes its utilization * maximum power consumption...
+        // ...and a share of the idle time of the processor it is on.
+        // The idle time is (1 - utilization) * k * maximum power consumption.
+        scenarios.values().stream().forEach(sc -> sc.getEntries().stream()
+                .forEach(e -> profiles.put(sc.getName(),
+                        profiles.get(sc.getName()) +
+                        // Share of maximum power consumption
+                        e.getUtilization() * energyCoefficients.get(e.getProcessor()) +
+                        // Share of idle time (1 - utilization) * entry share of utilization * k * maximum power consumption
+                        (1 - e.getProcUtilization()) * e.getUtilization() / e.getProcUtilization() *
+                        idleScalingFactor * energyCoefficients.get(e.getProcessor())
+                        )));
+
+        return profiles;
     }
 
     /**
@@ -106,7 +118,18 @@ public class Profiler {
      * @return Map with the scenario name as key and the price profile value as value.
      */
     public static Map<String, Double> computePriceProfile(final UML uml, final LQN lqn) {
-        return computeProfile(lqn.getEntriesByScenario(), uml.getNodesPrices());
+        final Map<String, Scenario> scenarios = lqn.getEntriesByScenario();
+        final Map<String, Double> prices = uml.getNodesPrices();
+
+        // A share of the cost of a node is attributed to an entry on the basis of
+        // the share of utilization of that entry on that node.
+        return scenarios.values().stream()
+                .collect(Collectors.toMap(
+                        sc -> sc.getName(),
+                        sc -> sc.getEntries().stream()
+                        .mapToDouble(e -> e.getUtilization() / e.getProcUtilization() * prices.get(e.getProcessor()))
+                        .sum()
+                        ));
     }
 
     /**
@@ -117,7 +140,7 @@ public class Profiler {
      */
     public static double computeSystemPrice(final UML uml) {
         return uml.getNodesPrices().values().stream()
-				.mapToDouble(Double::doubleValue)
-				.sum();
+                .mapToDouble(Double::doubleValue)
+                .sum();
     }
 }
