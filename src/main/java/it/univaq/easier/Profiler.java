@@ -20,8 +20,6 @@ public class Profiler {
             final double utilization,
             final double maxConsumption,
             final double idleScalingFactor) {
-        // k * p_max + (1 - k) * p_max * u
-        //return idleScalingFactor * maxConsumption + (1 - idleScalingFactor) * maxConsumption * utilization;
 
         // (1 - u) * k * p_max + u * p_max
         return (1 - utilization) * idleScalingFactor * maxConsumption + utilization * maxConsumption;
